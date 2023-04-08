@@ -58,7 +58,7 @@ model = GPT2LMHeadModel.from_pretrained('ckiplab/gpt2-base-chinese')
 import torch
 
 # https://huggingface.co/docs/transformers/perplexity
-def get_most_fluent_sentence_index(candidates):
+def get_most_fluent_sentence_index(candidates: list[str]) -> int:
     encodings = [tokenizer(candidate, return_tensors="pt") for candidate in candidates]
     ppls = []
     for encoding in encodings:
@@ -100,6 +100,7 @@ def flatten(l):
     return [item for sublist in l for item in sublist]
 
 def can2man(s: str) -> str:
+    s = s.replace(" ", "")
     man_phrases = longest_match_translate(s, can2man_table)
     # print(man_phrases)
     for i, phrases in enumerate(man_phrases):
@@ -109,7 +110,7 @@ def can2man(s: str) -> str:
             j = i + 1
             while j < len(man_phrases) and man_phrases[j] == 1:
                 j += 1
-            backward_context = "".join(flatten(man_phrases[:i]))
+            backward_context = "".join(flatten(man_phrases[max(0, i - 10):i]))
             forward_context = "".join(flatten(man_phrases[i + 1:j]))
             # forward context is too small
             while len(forward_context) < 10 and j < len(man_phrases):
@@ -126,8 +127,10 @@ def can2man(s: str) -> str:
 assert can2man("唔該你細聲啲，我喺度做緊嘢。") == "請你小聲點，我在這裡正在做東西。"
 
 from tqdm import tqdm
+import sys
 
-i = "aa"
-with open(f"can/can-{i}", "r") as input_file, open(f"man/man-{i}", "w+") as output_file:
+i = sys.argv[1]
+with open(f"can/can-{i}.txt", "r") as input_file, open(f"man/man-{i}.txt", "w+") as output_file:
+    print(f"Translating can-{i}.txt and saving results to man-{i}.txt")
     for line in tqdm(input_file.read().splitlines()):
         output_file.write(can2man(line) + "\n")
