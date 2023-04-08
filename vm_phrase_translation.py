@@ -58,7 +58,7 @@ model = GPT2LMHeadModel.from_pretrained('ckiplab/gpt2-base-chinese')
 import torch
 
 # https://huggingface.co/docs/transformers/perplexity
-def get_most_fluent_sentence_index(candidates: list[str]) -> int:
+def get_most_fluent_sentence_index(candidates):
     encodings = [tokenizer(candidate, return_tensors="pt") for candidate in candidates]
     ppls = []
     for encoding in encodings:
